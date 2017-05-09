@@ -92,14 +92,15 @@ class NaiveBayes:
         best_label = self._labels[0]
         x = x.flatten()
         
-        prob = {} # 记录各类别下后验概率，用于归一化概率，估计可能性
+        prob_yx = {} # 记录各类别下后验概率，用于归一化概率，估计可能性
+                     # 后验概率也是条件概率，描述的是给定特征x后，类别y出现的概率
         
 #        for i_label in self._labels[i_label]: # 用索引访问对于估计可能性更方便！
         for label in self._labels:  
             prob_c = self.prob_y[label]
             for i_feat in xrange(self._N):
                 if self.indicator[i_feat] == 1:
-                    for value in x[np.where(indicator == 1)]:
+                    for value in x[np.where(indicator == 1)]:  # 采用索引遍历也可以
 #                        print x
                         prob_c = prob_c * self.prob_xy[i_feat][value][label]
 #                        print prob_c
@@ -113,9 +114,9 @@ class NaiveBayes:
                 best_prob = prob_c
                 best_label = label
 #                print best_prob, best_label
-            prob[label] = prob_c
+            prob_yx[label] = prob_c
                 
-        best_prob = prob[best_label] / sum(prob.values())  # 概率估计
+        best_prob = prob_yx[best_label] / sum(prob_yx.values())  # 概率估计
         return best_prob, best_label
     
     def pred(self, X):
