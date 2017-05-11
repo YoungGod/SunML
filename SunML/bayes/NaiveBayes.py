@@ -17,7 +17,7 @@ class NaiveBayes:
         输入参数：X,y,indicator(0表示连续变量)
         输出参数：prob_y,prob_xy,mu,sigma
         """
-        self.X = np.array(X)
+        self.X = np.array(X)  # 训练数据集合应该不是类的属性！！这样设计不合理，修改！！！
         self.y = np.array(y)
         self.prob_y = {}  # 各类别的先验概率
         self.prob_xy = {}  # 各类别下各特征变量相应取值的条件概率
