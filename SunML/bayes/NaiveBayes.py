@@ -110,6 +110,7 @@ class NaiveBayes:
                                                       self.sigma[i_feat][label])
 #                        print prob_c
 #            print label, prob_c
+
             if prob_c > best_prob:
                 best_prob = prob_c
                 best_label = label
@@ -119,17 +120,53 @@ class NaiveBayes:
         best_prob = prob_yx[best_label] / sum(prob_yx.values())  # 概率估计
         return best_prob, best_label
     
-    def pred(self, X):
+    def _pred_log(self, x):
+        """
+        功能：对数概率计算，该方法可以集成在_pred函数中，但为了预测计算更快重写一个函数
+        """
+        best_prob = -np.inf
+        best_label = self._labels[0]
+        x = x.flatten()
+        
+        # log prob
+        for label in self._labels:  
+            prob_indicator1 = 0
+            prob_indicator0 = 0
+            for i_feat in xrange(self._N):
+                if self.indicator[i_feat] == 1:
+                    for value in x[np.where(indicator == 1)]:  
+                        prob_indicator1 += np.log(self.prob_xy[i_feat][value][label])
+                else:
+                    for value in x[np.where(indicator == 0)]:
+                        prob_indicator0 += np.log(self._gauss(value, self.mu[i_feat][label],
+                                                      self.sigma[i_feat][label]))
+                        
+            prob_c = np.log(self.prob_y[label]) + prob_indicator1 + prob_indicator0
+
+            if prob_c > best_prob:
+                best_prob = prob_c
+                best_label = label
+        return best_label        
+        
+    
+    def pred(self, X, prob_type = None):
         """
         功能：给定新样本特征向量集X,预测分类
         """
-        prob = []
-        label = []
-        for x in X:
-            best_prob, best_label = self._pred(x)
-            prob.append(best_prob)
-            label.append(best_label)
-        return np.array(label),np.array(prob)
+        if prob_type == None:
+            prob = []
+            label = []
+            for x in X:
+                best_prob, best_label = self._pred(x)
+                prob.append(best_prob)
+                label.append(best_label)
+            return np.array(label),np.array(prob)
+        elif prob_type == 'log':
+            label = []
+            for x in X:
+                best_label = self._pred_log(x)
+                label.append(best_label)
+            return np.array(label)
     
     def _gauss(self, value, mu, sigma):
         """
@@ -137,6 +174,7 @@ class NaiveBayes:
         """
         e = np.exp(-np.power(value-mu,2) / (2*sigma**2))
         return 1 / np.sqrt(2*np.pi) / sigma * e
+    
 
 # test
 if __name__ == "__main__":
@@ -170,8 +208,12 @@ if __name__ == "__main__":
     
     NB.train()
     label, prob = NB.pred(X)
+    
     print label
     print prob
+    
+    label = NB.pred(X, prob_type = 'log')
+    print label
 ##    NB.pred(X[3,:])
 #    print "sample 0 is:",NB.pred(X[0,:]), ",real is:",y[0],"\n", \
 #        "sample 1 is:",NB.pred(X[1,:]),",real is:",y[1],"\n", \
