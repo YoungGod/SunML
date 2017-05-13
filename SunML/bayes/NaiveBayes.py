@@ -99,14 +99,12 @@ class NaiveBayes:
         for label in self._labels:  
             prob_c = self.prob_y[label]
             for i_feat in xrange(self._N):
+                value = x[i_feat]
                 if self.indicator[i_feat] == 1:
-                    for value in x[np.where(indicator == 1)]:  # 采用索引遍历也可以
-#                        print x
-                        prob_c = prob_c * self.prob_xy[i_feat][value][label]
+                    prob_c = prob_c * self.prob_xy[i_feat][value][label]
 #                        print prob_c
                 else:
-                    for value in x[np.where(indicator == 0)]:
-                        prob_c = prob_c * self._gauss(value, self.mu[i_feat][label],
+                    prob_c = prob_c * self._gauss(value, self.mu[i_feat][label],
                                                       self.sigma[i_feat][label])
 #                        print prob_c
 #            print label, prob_c
@@ -117,7 +115,7 @@ class NaiveBayes:
 #                print best_prob, best_label
             prob_yx[label] = prob_c
                 
-        best_prob = prob_yx[best_label] / sum(prob_yx.values())  # 概率估计
+        best_prob = prob_yx[best_label] / sum(prob_yx.values())  # 概率估计,实际上概率估计是不准确的
         return best_prob, best_label
     
     def _pred_log(self, x):
@@ -133,12 +131,11 @@ class NaiveBayes:
             prob_indicator1 = 0
             prob_indicator0 = 0
             for i_feat in xrange(self._N):
+                value = x[i_feat]
                 if self.indicator[i_feat] == 1:
-                    for value in x[np.where(indicator == 1)]:  
-                        prob_indicator1 += np.log(self.prob_xy[i_feat][value][label])
+                    prob_indicator1 += np.log(self.prob_xy[i_feat][value][label])
                 else:
-                    for value in x[np.where(indicator == 0)]:
-                        prob_indicator0 += np.log(self._gauss(value, self.mu[i_feat][label],
+                    prob_indicator0 += np.log(self._gauss(value, self.mu[i_feat][label],
                                                       self.sigma[i_feat][label]))
                         
             prob_c = np.log(self.prob_y[label]) + prob_indicator1 + prob_indicator0
