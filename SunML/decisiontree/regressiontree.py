@@ -46,7 +46,7 @@ class RegressionTree:
                     best_value = value
                     best_err = new_err
                     
-        right_set, left_set = self.bin_split(dataset, tol_m, tol_s)
+        right_set, left_set = self.bin_split(dataset, best_feat, best_value)
         if right_set.shape[0] < tol_m and left_set.shape[0] < tol_m:
             return None, dataset[:,-1].mean()
         if err - best_err < tol_s:
@@ -86,31 +86,37 @@ class RegressionTree:
         """
         feat = tree['feature']
         if x[feat] > tree['value']:
-            if tree['right'] is dict:
-                self._pred(x, tree['right'])
+            if type(tree['right']) is dict:
+                return self._pred(x, tree['right'])
             else:
                 return tree['right']
             
         if x[feat] <= tree['value']:
-            if tree['left'] is dict:
-                self._pred(x, tree['left'])
+            if type(tree['left']) is dict:
+                return self._pred(x, tree['left'])
             else:
                 return tree['left']
     
     def predict(self, X):
         tree = self.tree
-        y_pred = []
-        for x in X:
-            y_pred.append(self._pred(x, tree))
-        return np.array(y_pred)
+        try:
+            X.shape[1]  # 如果X不是二维array则索引错误，进入except
+            y_pred = []
+            for x in X:
+                y_pred.append(self._pred(x, tree))
+            return np.array(y_pred)
+        except IndexError:
+            return np.array(self._pred(X, tree))
     
 if __name__ == "__main__":
-    np.random.seed(0)
-    X = np.random.random((10,4))
-    y = np.random.randint(0,3,10)
-    re_tree = RegressionTree()
-    re_tree.train(X,y)
-    print re_tree.tree
+#    np.random.seed(0)
+#    X = np.random.random((5,4))
+#    y = np.random.randint(0,2,5)
+#    re_tree = RegressionTree()
+#    re_tree.train(X,y)
+#    pred = re_tree.predict(X)
+#    print re_tree.tree
+
     
     # Fitting
     
@@ -124,7 +130,7 @@ if __name__ == "__main__":
     y = data_set[:,-1]
     
     re_tree = RegressionTree()
-    re_tree.train(X,y)
+    re_tree.train(X,y,tol_m = 8, tol_s = 0.01)
     
 #    pred = predict(re_tree, data_set[0,0:-1])
     
@@ -137,7 +143,7 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
     
-    pred = pred[data_set[:,1].argsort(),:]
+    pred = pred[data_set[:,1].argsort()]
     data_set = data_set[data_set[:,1].argsort(),:]
     plt.plot(data_set[:,1],data_set[:,2],'b-',label = "Origin")
     plt.plot(data_set[:,1],pred,'r-.',label = "Fit")
