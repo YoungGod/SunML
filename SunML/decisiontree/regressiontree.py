@@ -13,7 +13,8 @@ class RegressionTree:
     """
     def __init__(self):
 
-        self.tree = None    
+        self.tree = None
+        self.pruned_tree = None
    
     def bin_split(self, dataset, feat, value):
         right_set = dataset[np.where(dataset[:,feat] > value)]
@@ -108,6 +109,41 @@ class RegressionTree:
         except IndexError:
             return np.array(self._pred(X, tree))
     
+    def is_tree(self, tree):
+        if type(tree).__name__ == 'dict':
+            return True
+        else:
+            return False
+        
+    def prune(self, tree, X, y):
+        """
+        功能：后剪枝
+        """
+        dataset = np.concatenate((X,y.reshape(-1,1)), axis = 1)
+        self.pruned_tree = self._prune(tree, dataset)
+    
+    def _prune(self, tree, dataset):
+        right_set, left_set = self.bin_split(dataset, tree['feature'], tree['value'])
+        
+        if self.is_tree(tree['right']):
+            tree['right'] = self._prune(tree['right'], right_set)
+        if self.is_tree(tree['left']):
+            tree['left'] = self._prune(tree['left'], left_set)
+            
+#        print 'right:',tree['right']
+#        print 'left:',tree['left']    
+        
+        if not self.is_tree(tree['right']) and not self.is_tree(tree['left']):
+            err_nomerge = sum(np.power(right_set[:,-1]-tree['right'],2)) + \
+                          sum(np.power(left_set[:,-1]-tree['left'],2))
+            err_merge = sum(np.power(dataset[:,-1]-(tree['right']+tree['left'])/2.0,2))
+            if err_merge <= err_nomerge:
+                return (tree['right']+tree['left'])/2.0
+            else:
+                return tree
+            
+        return tree
+    
 if __name__ == "__main__":
 #    np.random.seed(0)
 #    X = np.random.random((5,4))
@@ -150,16 +186,29 @@ if __name__ == "__main__":
     plt.legend()
     plt.show()
 
-#    # testing
-#    test_data = load_dataset('ex1.txt')
-#    pred = np.zeros((len(test_data),1))
-#    for i in xrange(len(test_data)):
-#        pred[i,:] = predict(re_tree, test_data[i,0:-1])    
-#    err_no_prune = sum(np.power(test_data[:,-1] - pred.flatten(),2))
-#    
-#    pred = pred[test_data[:,1].argsort(),:]
-#    test_data = test_data[test_data[:,1].argsort(),:]
-#    plt.plot(test_data[:,1],test_data[:,2],'b-',label = "Origin")
-#    plt.plot(test_data[:,1],pred,'r-.',label = "Predict")
-#    plt.legend()
-#    plt.show()   
+    # testing
+    
+    fr = open('test_data.txt','r')
+    test_data = []
+    for line in fr.readlines():
+        test_data.append([float(i) for i in line.strip().split()])
+    test_data = np.array(data_set)
+    X_val = test_data[:,0:-1] 
+    y_val = test_data[:,-1]
+    pred = re_tree.predict(X_val) 
+    err_no_prune = sum(np.power(test_data[:,-1] - pred.flatten(),2))
+    
+    pred = pred[test_data[:,1].argsort()]
+    test_data = test_data[test_data[:,1].argsort(),:]
+    plt.plot(test_data[:,1],test_data[:,2],'b-',label = "Origin")
+    plt.plot(test_data[:,1],pred,'r-.',label = "Predict")
+    plt.legend()
+    plt.show()
+    
+    import copy
+    re_tree.prune(copy.deepcopy(re_tree.tree), X_val, y_val)
+    pred = re_tree.predict(X)
+    err_pruned = sum(np.power(data_set[:,-1] - pred.flatten(),2))
+    
+    print err_no_prune
+    print err_pruned
