@@ -77,7 +77,7 @@ class RegressionTree:
         if y.std() == 0.0:
             self.tree = y[0]
         else:
-#            print "train1 OK"
+            print "train1 OK", X.shape,y.shape
             dataset = np.concatenate((X,y.reshape(-1,1)),axis=1)
 #            print "trian2 OK"
             self.tree = self.create_tree(dataset, tol_m, tol_s)
@@ -160,83 +160,136 @@ if __name__ == "__main__":
 #    print re_tree.tree
 
     
-    # Fitting
+#    # Fitting
+#    
+#    fr = open('data.txt','r')
+#    data_set = []
+#    for line in fr.readlines():
+#        data_set.append([float(i) for i in line.strip().split()])
+#    fr.close()
+#    
+#    data_set = np.array(data_set)
+#    X = data_set[:,0:-1] 
+#    y = data_set[:,-1]
+#    
+#    re_tree = RegressionTree()
+#    re_tree.train(X,y,tol_m = 4, tol_s = 0.01)
+#    fit = re_tree.predict(X)
+#    
+#    import matplotlib.pyplot as plt
+#    plt.scatter(data_set[:,1],data_set[:,2],c='b',label = "Origin")
+#    plt.scatter(data_set[:,1],fit,c='r',label = "Fit")
+#    plt.legend()
+#    plt.show()
+#    
+#    fit = fit[data_set[:,1].argsort()]
+#    data_set = data_set[data_set[:,1].argsort(),:]
+#    plt.plot(data_set[:,1],data_set[:,2],'b-',label = "Origin")
+#    plt.plot(data_set[:,1],fit,'r-.',label = "Fit")
+#    plt.legend()
+#    plt.show()
+#
+#    # test
+#    
+#    fr = open('test_data.txt','r')
+#    test_data = []
+#    for line in fr.readlines():
+#        test_data.append([float(i) for i in line.strip().split()])
+#    fr.close()
+#    
+#    test_data = np.array(test_data)
+#    X_val = test_data[:,0:-1] 
+#    y_val = test_data[:,-1]
+#    pred = re_tree.predict(X_val) 
+#    
+#    err_no_prune = sum(np.power(test_data[:,-1] - pred.flatten(),2))
+#    
+#    pred = pred[test_data[:,1].argsort()]
+#    test_data = test_data[test_data[:,1].argsort(),:]
+#    plt.plot(test_data[:,1],test_data[:,2],'b-',label = "Origin")
+#    plt.plot(test_data[:,1],pred,'r-.',label = "Predict")
+#    plt.legend()
+#    plt.show()
+#    
+#    # prune
+#    import copy
+#    
+#    fr = open('test_data.txt','r')
+#    test_data = []
+#    for line in fr.readlines():
+#        test_data.append([float(i) for i in line.strip().split()])
+#    fr.close()
+#    
+#    test_data = np.array(test_data)
+#    X_val = test_data[:,0:-1] 
+#    y_val = test_data[:,-1]
+#
+#    tree = copy.deepcopy(re_tree.tree)
+#    re_tree.prune(tree, X_val, y_val)
+#    pred = re_tree.predict(X_val, prune='pruned')
+#    
+#    err_pruned = sum(np.power(test_data[:,-1] - pred.flatten(),2))
+#    
+#    pred = pred[test_data[:,1].argsort()]
+#    test_data = test_data[test_data[:,1].argsort(),:]
+#    plt.plot(test_data[:,1],test_data[:,2],'b-',label = "Origin")
+#    plt.plot(test_data[:,1],pred,'r-.',label = "Predict-pruned")
+#    plt.legend()
+#    plt.show()
+#    
+#    
+#    print err_no_prune
+#    print err_pruned
     
-    fr = open('data.txt','r')
-    data_set = []
-    for line in fr.readlines():
-        data_set.append([float(i) for i in line.strip().split()])
-    fr.close()
+    from sklearn.datasets import load_diabetes
+    from sklearn.model_selection import train_test_split
+    import matplotlib.pyplot as plt
     
-    data_set = np.array(data_set)
-    X = data_set[:,0:-1] 
-    y = data_set[:,-1]
+    def err(y,pred):
+        return sum(np.power(y-pred,2))/y.shape[0]
+    
+    dataset = load_diabetes()
+    X = dataset.data
+    y = dataset.target
+    X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.33,random_state=1)
+    X_val, X_test, y_val, y_test = train_test_split(X_test,y_test,test_size=0.5,random_state=1)
     
     re_tree = RegressionTree()
-    re_tree.train(X,y,tol_m = 4, tol_s = 0.01)
-    fit = re_tree.predict(X)
+    re_tree.train(X_train, y_train, tol_m = 50, tol_s = 0.000001)
+    fit = re_tree.predict(X_train)
     
-    import matplotlib.pyplot as plt
-    plt.scatter(data_set[:,1],data_set[:,2],c='b',label = "Origin")
-    plt.scatter(data_set[:,1],fit,c='r',label = "Fit")
+    plt.plot(y_train,label='train')
+    plt.plot(fit,label='fit')
     plt.legend()
     plt.show()
     
-    fit = fit[data_set[:,1].argsort()]
-    data_set = data_set[data_set[:,1].argsort(),:]
-    plt.plot(data_set[:,1],data_set[:,2],'b-',label = "Origin")
-    plt.plot(data_set[:,1],fit,'r-.',label = "Fit")
-    plt.legend()
-    plt.show()
-
-    # test
-    
-    fr = open('test_data.txt','r')
-    test_data = []
-    for line in fr.readlines():
-        test_data.append([float(i) for i in line.strip().split()])
-    fr.close()
-    
-    test_data = np.array(test_data)
-    X_val = test_data[:,0:-1] 
-    y_val = test_data[:,-1]
-    pred = re_tree.predict(X_val) 
-    
-    err_no_prune = sum(np.power(test_data[:,-1] - pred.flatten(),2))
-    
-    pred = pred[test_data[:,1].argsort()]
-    test_data = test_data[test_data[:,1].argsort(),:]
-    plt.plot(test_data[:,1],test_data[:,2],'b-',label = "Origin")
-    plt.plot(test_data[:,1],pred,'r-.',label = "Predict")
+    pred = re_tree.predict(X_test)
+    plt.plot(y_test,label='test')
+    plt.plot(pred,label='predict')
     plt.legend()
     plt.show()
     
-    # prune
+    
     import copy
-    
-    fr = open('test_data.txt','r')
-    test_data = []
-    for line in fr.readlines():
-        test_data.append([float(i) for i in line.strip().split()])
-    fr.close()
-    
-    test_data = np.array(test_data)
-    X_val = test_data[:,0:-1] 
-    y_val = test_data[:,-1]
-
-    tree = copy.deepcopy(re_tree.tree)
-    re_tree.prune(tree, X_val, y_val)
-    pred = re_tree.predict(X_val, prune='pruned')
-    
-    err_pruned = sum(np.power(test_data[:,-1] - pred.flatten(),2))
-    
-    pred = pred[test_data[:,1].argsort()]
-    test_data = test_data[test_data[:,1].argsort(),:]
-    plt.plot(test_data[:,1],test_data[:,2],'b-',label = "Origin")
-    plt.plot(test_data[:,1],pred,'r-.',label = "Predict-pruned")
+    re_tree.prune(copy.deepcopy(re_tree.tree),X_val,y_val)
+    pred_pruned = re_tree.predict(X_test,prune='pruned')
+    plt.plot(y_test,label='test')
+    plt.plot(pred_pruned,label='predict pruned')
     plt.legend()
     plt.show()
     
+   
+    from sklearn import tree
+    sk_tree = tree.DecisionTreeRegressor(min_samples_leaf=20,random_state=1)
+    sk_tree.fit(X_train,y_train)
+    pred_sk = sk_tree.predict(X_test)
     
-    print err_no_prune
-    print err_pruned
+    plt.plot(y_test,label='test')
+    plt.plot(pred_sk,label='predict sk_tree')
+    plt.legend()
+    plt.show()
+   
+    print 'fit err:', err(y_train,fit)
+    print 'pred err:', err(y_test,pred)
+    print 'pred pruned err:', err(y_test,pred_pruned)
+    print 'sk_tree err:', err(y_test,pred_sk)
