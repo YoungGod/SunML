@@ -255,7 +255,7 @@ if __name__ == "__main__":
     X_val, X_test, y_val, y_test = train_test_split(X_test,y_test,test_size=0.5,random_state=1)
     
     re_tree = RegressionTree()
-    re_tree.train(X_train, y_train, tol_m = 50, tol_s = 0.000001)
+    re_tree.train(X_train, y_train, tol_m = 62, tol_s = 0.000001)
     fit = re_tree.predict(X_train)
     
     plt.plot(y_train,label='train')
@@ -280,7 +280,7 @@ if __name__ == "__main__":
     
    
     from sklearn import tree
-    sk_tree = tree.DecisionTreeRegressor(min_samples_leaf=20,random_state=1)
+    sk_tree = tree.DecisionTreeRegressor(min_samples_leaf=50,random_state=1)
     sk_tree.fit(X_train,y_train)
     pred_sk = sk_tree.predict(X_test)
     
