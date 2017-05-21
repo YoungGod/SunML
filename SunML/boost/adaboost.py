@@ -7,3 +7,7 @@ Created on Wed May 17 23:46:56 2017
 
 class AdaBoost:
     pass
+
+
+if __name__ == '__main__':
+    pass
