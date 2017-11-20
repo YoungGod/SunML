@@ -6,9 +6,9 @@ except ImportError:
 config = {
     'description': 'My Project: my own machine learning library - SunML',
     'author': 'Jie Yang',
-    'url': 'URL to get it at.',
-    'download_url': 'Where to download it.',
-    'author_email': 'My email.',
+    'url': 'https://github.com/YoungGod/SunML/.',
+    'download_url': 'https://github.com/YoungGod/SunML/.',
+    'author_email': 'dearyangjie@yeah.net',
     'version': '0.1',
     'install_requires': ['nose'],
     'packages': ['SunML'],

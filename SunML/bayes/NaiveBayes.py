@@ -13,9 +13,9 @@ class NaiveBayes:
     """
     def __init__(self, X, y, indicator = None):
         """
-        功能：初始化参数
-        输入参数：X,y,indicator(0表示连续变量)
-        输出参数：prob_y,prob_xy,mu,sigma
+        Function：初始化参数
+        Input Parameters：X,y,indicator(0表示连续变量)
+        Output Parameters：prob_y,prob_xy,mu,sigma
         """
         self.X = np.array(X)  # 训练数据集合应该不是类的属性！！这样设计不合理，修改！！！
         self.y = np.array(y)
@@ -36,7 +36,7 @@ class NaiveBayes:
             
     def train(self):
         """
-        功能：学习参数prob_y,prob_xy（离散特征），mu,sigma（连续特征）
+        Function：学习参数prob_y,prob_xy（离散特征），mu,sigma（连续特征）
         """
         # 计算prob_y
         label_counts = {}
@@ -78,7 +78,7 @@ class NaiveBayes:
                 
     def _counts(self, value, x):
         """
-        功能：统计label下，第i特征，各取值为value的计数
+        Fucntion：统计label下，第i特征，各取值为value的计数
         似乎没有什么意义？ 
         可以把计算prob_xy设计为一个函数
         """
@@ -86,7 +86,7 @@ class NaiveBayes:
     
     def _pred(self, x):
         """
-        功能：给定特征矢量x,及特征变量离散或连续标识indicator，预测所属分类
+        Function：给定特征矢量x,及特征变量离散或连续标识indicator，预测所属分类
         """
         best_prob = 0.0
         best_label = self._labels[0]
@@ -120,7 +120,7 @@ class NaiveBayes:
     
     def _pred_log(self, x):
         """
-        功能：对数概率计算，该方法可以集成在_pred函数中，但为了预测计算更快重写一个函数
+        Function：对数概率计算，该方法可以集成在_pred函数中，但为了预测计算更快重写一个函数
         """
         best_prob = -np.inf
         best_label = self._labels[0]
@@ -148,7 +148,7 @@ class NaiveBayes:
     
     def pred(self, X, prob_type = None):
         """
-        功能：给定新样本特征向量集X,预测分类
+        Function：给定新样本特征向量集X,预测分类
         """
         if prob_type == None:
             prob = []
@@ -167,7 +167,7 @@ class NaiveBayes:
     
     def _gauss(self, value, mu, sigma):
         """
-        功能：在高斯分布假设下，计算连续特征变量取值value的概率
+        Function：在高斯分布假设下，计算连续特征变量取值value的概率
         """
         e = np.exp(-np.power(value-mu,2) / (2*sigma**2))
         return 1 / np.sqrt(2*np.pi) / sigma * e
